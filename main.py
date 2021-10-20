@@ -3,12 +3,13 @@ pd.set_option('display.float_format', '{:.2f}'.format)
 from functions import *
 import streamlit as st
 
+
 st.set_page_config(layout="wide",page_title="DS&ML SIG Houston ", page_icon="🖖")
 header = st.container()
 
 with header:
     st.title("Primary Rock Types Cluster Dashboard")
-    st.subheader("Primary Rock Types for 1 well in the Williston Basin")
+    st.subheader("Data Analysis for 1 well in the Williston Basin")
 
 @st.cache
 def get_data():
@@ -55,11 +56,20 @@ with col1:
         cluster_model = creating_model(df_scale, data, al, k)
 
     else:
+
         q = st.slider('Select a Quantile', min_value=0.1,
-                              max_value=1.0, value=0.4, step=0.1, format="%.1f")
+                                  max_value=1.0, value=0.4, step=0.1, format="%.1f")
         st.info(f'MeanShift uses the Quantile to automatically detect the bandwith')
 
-        cluster_model = creating_model_ms(df_scale,al,q,data)[0]
+        if creating_model_ms(df_scale,al,q,data)[1] == 1 or creating_model_ms(df_scale,al,q,data)[1] > 10:
+            st.error(f"The value setup in the quantile variable yields a cluster number "
+                     f" of {creating_model_ms(df_scale,al,q,data)[1]}, you need a minimum of 2"
+                     f" clusters and no more than 10 for this analysis - Please scroll for another quantile")
+            st.stop()
+
+        cluster_model = creating_model_ms(df_scale, al, q, data)[0]
+
+
 
 
 with col1:
@@ -74,5 +84,8 @@ with col1:
 with col2:
     st.subheader(f"Log plot with depths between {min} ft - {max} ft")
     st.pyplot(make_plot(cluster_model,min, max))
+
+
+
 
 

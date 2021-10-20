@@ -53,6 +53,7 @@ def creating_model_ms(df_scale, al, q, data):
         df_tc_cluster = data.copy()
         df_tc_cluster["Clusters"] = labels
 
+
         return df_tc_cluster,n_clusters_
 
 
