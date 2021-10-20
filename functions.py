@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from yellowbrick.cluster import KElbowVisualizer
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
-
+from sklearn.metrics import pairwise_distances, silhouette_score
 
 
 
@@ -21,7 +21,8 @@ def creating_model(df_scale, data, al, k=1):
         df_tc_nrm_cluster = df_scale.copy()
         df_tc_cluster['Clusters'] = cluster_model.labels_ + 1
         df_tc_nrm_cluster['Clusters'] = cluster_model.labels_ + 1
-        return df_tc_cluster
+        ss = silhouette_score(df_scale,cluster_model.labels_,metric='euclidean')
+        return df_tc_cluster, ss
 
     elif al == 'Gaussian Mixture':
         EM = GaussianMixture(n_components=k)
@@ -30,7 +31,8 @@ def creating_model(df_scale, data, al, k=1):
         df_tc_cluster = data.copy()
         df_tc_cluster['Clusters'] = cluster_model + 1
         df_scale['Clusters'] = cluster_model
-        return df_tc_cluster
+        ss = silhouette_score(df_scale, cluster_model, metric='euclidean')
+        return df_tc_cluster,ss
 
     elif al == 'Agglomerative Clustering':
         hac = AgglomerativeClustering(n_clusters=k, affinity="euclidean",
@@ -38,8 +40,8 @@ def creating_model(df_scale, data, al, k=1):
         hac.fit(df_scale)
         df_tc_cluster = data.copy()
         df_tc_cluster['Clusters'] = hac.labels_ + 1
-
-        return df_tc_cluster
+        ss = silhouette_score(df_scale, hac.labels_, metric='euclidean')
+        return df_tc_cluster, ss
 
 def creating_model_ms(df_scale, al, q, data):
     if al == "MeanShift":
@@ -52,7 +54,7 @@ def creating_model_ms(df_scale, al, q, data):
         n_clusters_ = len(labels_unique)
         df_tc_cluster = data.copy()
         df_tc_cluster["Clusters"] = labels
-
+        #ss = silhouette_score(df_scale,model.labels_, metric='euclidean')
 
         return df_tc_cluster,n_clusters_
 
@@ -83,7 +85,7 @@ def plot_model(cluster_model,k):
                     y='RHOZ',
                     z='GR',
                     color='Clusters',
-                    color_continuous_scale=list(cluster_color_dict.values()))
+                    color_continuous_scale=list(cluster_color_dict.values()),width=1000, height=500)
 
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
     fig.update_traces(marker_size=3)

@@ -2,7 +2,7 @@ import pandas as pd
 pd.set_option('display.float_format', '{:.2f}'.format)
 from functions import *
 import streamlit as st
-
+import plotly.express as px
 
 st.set_page_config(layout="wide",page_title="DS&ML SIG Houston ", page_icon="🖖")
 header = st.container()
@@ -30,7 +30,7 @@ col1, col2 = st.columns(2)
 
 with col1:
 
-    st.subheader("Select the depth for the  Well Data")
+    st.subheader("Select the limits for your Well Data")
     basin = st.selectbox('Select a Formation', ('None - User Selection','Bakken Petroleum System'))
     if basin == 'Bakken Petroleum System':
         min = 9208
@@ -44,7 +44,6 @@ with col1:
     data = data.loc[min:max, :]
     df_scale = scale_data(data)
 
-
     st.subheader("Clustering")
     al = st.selectbox('Select an Unsupervised Learning Model',
                   ['K-means','Gaussian Mixture',
@@ -53,8 +52,9 @@ with col1:
     if al == 'K-means' or al == 'Gaussian Mixture' or al == 'Agglomerative Clustering':
         k=st.slider('Select number of Clusters',2,10)
 
-        cluster_model = creating_model(df_scale, data, al, k)
-
+        cluster_model = creating_model(df_scale, data, al, k)[0]
+        ss = creating_model(df_scale, data, al, k)[1]
+        st.info(f"The silhouette score is {round(ss,2)}")
     else:
 
         q = st.slider('Select a Quantile', min_value=0.1,
@@ -64,7 +64,7 @@ with col1:
         if creating_model_ms(df_scale,al,q,data)[1] == 1 or creating_model_ms(df_scale,al,q,data)[1] > 10:
             st.error(f"The value setup in the quantile variable yields a cluster number "
                      f" of {creating_model_ms(df_scale,al,q,data)[1]}, you need a minimum of 2"
-                     f" clusters and no more than 10 for this analysis - Please scroll for another quantile")
+                     f" clusters and no more than 10 for this analysis - Please select another quantile value")
             st.stop()
 
         cluster_model = creating_model_ms(df_scale, al, q, data)[0]
@@ -72,20 +72,75 @@ with col1:
 
 
 
-with col1:
-    st.subheader(f"Plot for {al} algorithm")
+with col2:
+    st.subheader(f"3D Cluster Plot for {al} algorithm")
     if al != "MeanShift":
         st.plotly_chart(plot_model(cluster_model,k))
     else:
         st.plotly_chart(plot_model(cluster_model,creating_model_ms(df_scale,al,q,data)[1]))
-        st.info(f'The number of Clusters for the {al} algorithm is {creating_model_ms(df_scale,al,q,data)[1]} for'
+        with col1:
+            st.info(f'The number of Clusters for the {al} algorithm is {creating_model_ms(df_scale,al,q,data)[1]} for'
                 f' a {q} quantile')
 
-with col2:
+with col1:
     st.subheader(f"Log plot with depths between {min} ft - {max} ft")
     st.pyplot(make_plot(cluster_model,min, max))
 
+with col2:
+    st.subheader("2D Cluster Plot")
+
+    def Plot_2D(cluster_model,k=4):
+        template = {
+            1: 'yellow',
+            2: 'CornflowerBlue',
+            3: 'orange',
+            4: 'green',
+            5: 'black',
+            6: 'fuchsia',
+            7: 'red',
+            8: 'aqua',
+            9: 'deepskyblue',
+            10: 'greenyellow'
+        }
+        i, j = 1, k
+        cluster_color_dict = {}
+        for k, v in template.items():
+            if int(k) >= i and int(k) <= j:
+                cluster_color_dict[k] = v
+
+        fig = px.scatter(cluster_model,
+                         y='RHOZ',
+                         x='NPHI',
+                         color='Clusters',
+                         title='Density (RHOZ) vs Neutron (NPHI)',
+                         color_continuous_scale=list(cluster_color_dict.values()),width=1000, height=500)
+
+        fig1 = px.scatter(cluster_model,
+                         y='RHOZ',
+                         x='GR',
+                         color='Clusters',
+                         title='Density (RHOZ) vs Gamma Ray (GR)',
+                         color_continuous_scale=list(cluster_color_dict.values()),width=1000, height=500)
+
+        fig2 = px.scatter(cluster_model,
+                         y='NPHI',
+                         x='GR',
+                         color='Clusters',
+                         title='Neutron (NPHI) vs Gamma Ray (GR)',
+                         color_continuous_scale=list(cluster_color_dict.values()),width=1000, height=500)
 
 
+        return fig,fig1,fig2
+
+    if al != "MeanShift":
+        st.plotly_chart(Plot_2D(cluster_model, k)[0])
+        st.plotly_chart(Plot_2D(cluster_model, k)[1])
+        st.plotly_chart(Plot_2D(cluster_model, k)[2])
+
+    else:
+
+        st.plotly_chart(Plot_2D(cluster_model,creating_model_ms(df_scale,al,q,data)[1])[0])
+        st.plotly_chart(Plot_2D(cluster_model, creating_model_ms(df_scale,al,q,data)[1])[1])
+        st.plotly_chart(Plot_2D(cluster_model, creating_model_ms(df_scale,al,q,data)[1])[2])
 
 
