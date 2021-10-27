@@ -29,6 +29,10 @@ The dashboard allows you to choose the number of estimators, meaning the number 
 Lastly, the dashboard provides 2 visualizations; a 3D model with the 3 variables (Gamma Ray (GR),Density (RHOZ) &
 Neutron (NPHI)), since there can be variations between each of the variables, you can explore a 2D plot to locate differences between the clustering algorithms
 
+App hosted by Streamlit:
+
+https://share.streamlit.io/colina83/geo2data/main.py
+
 
 
 
