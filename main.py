@@ -70,8 +70,6 @@ with col1:
         cluster_model = creating_model_ms(df_scale, al, q, data)[0]
 
 
-
-
 with col2:
     st.subheader(f"3D Cluster Plot for {al} algorithm")
     if al != "MeanShift":
@@ -88,49 +86,6 @@ with col1:
 
 with col2:
     st.subheader("2D Cluster Plot")
-
-    def Plot_2D(cluster_model,k=4):
-        template = {
-            1: 'yellow',
-            2: 'CornflowerBlue',
-            3: 'orange',
-            4: 'green',
-            5: 'black',
-            6: 'fuchsia',
-            7: 'red',
-            8: 'aqua',
-            9: 'deepskyblue',
-            10: 'greenyellow'
-        }
-        i, j = 1, k
-        cluster_color_dict = {}
-        for k, v in template.items():
-            if int(k) >= i and int(k) <= j:
-                cluster_color_dict[k] = v
-
-        fig = px.scatter(cluster_model,
-                         y='RHOZ',
-                         x='NPHI',
-                         color='Clusters',
-                         title='Density (RHOZ) vs Neutron (NPHI)',
-                         color_continuous_scale=list(cluster_color_dict.values()),width=1000, height=500)
-
-        fig1 = px.scatter(cluster_model,
-                         y='RHOZ',
-                         x='GR',
-                         color='Clusters',
-                         title='Density (RHOZ) vs Gamma Ray (GR)',
-                         color_continuous_scale=list(cluster_color_dict.values()),width=1000, height=500)
-
-        fig2 = px.scatter(cluster_model,
-                         y='NPHI',
-                         x='GR',
-                         color='Clusters',
-                         title='Neutron (NPHI) vs Gamma Ray (GR)',
-                         color_continuous_scale=list(cluster_color_dict.values()),width=1000, height=500)
-
-
-        return fig,fig1,fig2
 
     if al != "MeanShift":
         st.plotly_chart(Plot_2D(cluster_model, k)[0])

@@ -250,22 +250,49 @@ visualizer.fit(df_scale)
 visualizer.show()
 
 
+def Plot_2D(cluster_model, k=4):
+    template = {
+        1: 'yellow',
+        2: 'CornflowerBlue',
+        3: 'orange',
+        4: 'green',
+        5: 'black',
+        6: 'fuchsia',
+        7: 'red',
+        8: 'aqua',
+        9: 'deepskyblue',
+        10: 'greenyellow'
+    }
+    i, j = 1, k
+    cluster_color_dict = {}
+    for k, v in template.items():
+        if int(k) >= i and int(k) <= j:
+            cluster_color_dict[k] = v
 
-'''
-###### Preparing the data
-scaler = StandardScaler()
-df_tc_nrm = scaler.fit_transform(df_tc)
+    fig = px.scatter(cluster_model,
+                     y='RHOZ',
+                     x='NPHI',
+                     color='Clusters',
+                     title='Density (RHOZ) vs Neutron (NPHI)',
+                     color_continuous_scale=list(cluster_color_dict.values()), width=1000, height=500)
 
-# Create DataFrame
-df_tc_nrm = pd.DataFrame(df_tc_nrm, columns=df_tc.columns, index=df_tc.index)
+    fig1 = px.scatter(cluster_model,
+                      y='RHOZ',
+                      x='GR',
+                      color='Clusters',
+                      title='Density (RHOZ) vs Gamma Ray (GR)',
+                      color_continuous_scale=list(cluster_color_dict.values()), width=1000, height=500)
 
-# Inspect
-print(df_tc_nrm.shape)
-df_tc_nrm.describe().T
+    fig2 = px.scatter(cluster_model,
+                      y='NPHI',
+                      x='GR',
+                      color='Clusters',
+                      title='Neutron (NPHI) vs Gamma Ray (GR)',
+                      color_continuous_scale=list(cluster_color_dict.values()), width=1000, height=500)
 
-def create_model
+    return fig, fig1, fig2
 
-'''
+
 
 
 
